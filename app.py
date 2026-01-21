@@ -16,8 +16,28 @@ def load_pickle(filename):
         return joblib.load(f)
 
 model_laptops = load_pickle('laptop_price_regression_model.pkl')
-columns_laptops = load_pickle('model_columns.pkl')
-print(columns_laptops)
+columns = [
+        'RAM_GB', 'Total_Storage', 'CPU_Gen', 'Has_GPU', 'SCREEN_SIZE',
+        'days_since_posted', 'CPU_Type_Core i3', 'CPU_Type_Core i5',
+        'CPU_Type_Core i7', 'CPU_Type_Core i9', 'CPU_Type_Other',
+        'CPU_Type_Ryzen', 'Condition_JAMAIS UTILIS', 'Condition_MOYEN',
+        'Condition_Unknown', 'model_name_ALIENWARE', 'model_name_ASPIRE',
+        'model_name_BLADE', 'model_name_COMPAQ', 'model_name_DYNABOOK',
+        'model_name_ELITEBOOK', 'model_name_ENVY', 'model_name_GALAXY',
+        'model_name_GF', 'model_name_IDEAPAD', 'model_name_IMAC',
+        'model_name_INSPIRON', 'model_name_KATANA', 'model_name_LATITUDE',
+        'model_name_LEGION', 'model_name_MAC', 'model_name_MACBOOK',
+        'model_name_NITRO', 'model_name_OMEN', 'model_name_OPTIPLEX',
+        'model_name_PAVILION', 'model_name_PRECISION', 'model_name_PREDATOR',
+        'model_name_PROBOOK', 'model_name_ROG', 'model_name_SPECTRE',
+        'model_name_SPIN', 'model_name_STEALTH', 'model_name_STRIX',
+        'model_name_SURFACE', 'model_name_SWIFT', 'model_name_SWORD',
+        'model_name_THINKBOOK', 'model_name_THINKPAD', 'model_name_TRANSFORMER',
+        'model_name_TRAVELMATE', 'model_name_TUF', 'model_name_VECTOR',
+        'model_name_VICTUS', 'model_name_VIVOBOOK', 'model_name_VOSTRO',
+        'model_name_XPS', 'model_name_YOGA', 'model_name_ZBOOK',
+        'model_name_ZENBOOK'
+    ]
 
 
 with open('price_classifier_improved.pkl', 'rb') as f:
@@ -53,33 +73,14 @@ df['price_per_kg'] = df['price'] / df['unit_kg_factor']
 @app.route('/predict-laptop', methods=['POST'])
 def predict_laptops():
     data = request.get_json()
-    columns = [
-        'RAM_GB', 'Total_Storage', 'CPU_Gen', 'Has_GPU', 'SCREEN_SIZE',
-        'days_since_posted', 'CPU_Type_Core i3', 'CPU_Type_Core i5',
-        'CPU_Type_Core i7', 'CPU_Type_Core i9', 'CPU_Type_Other',
-        'CPU_Type_Ryzen', 'Condition_JAMAIS UTILIS', 'Condition_MOYEN',
-        'Condition_Unknown', 'model_name_ALIENWARE', 'model_name_ASPIRE',
-        'model_name_BLADE', 'model_name_COMPAQ', 'model_name_DYNABOOK',
-        'model_name_ELITEBOOK', 'model_name_ENVY', 'model_name_GALAXY',
-        'model_name_GF', 'model_name_IDEAPAD', 'model_name_IMAC',
-        'model_name_INSPIRON', 'model_name_KATANA', 'model_name_LATITUDE',
-        'model_name_LEGION', 'model_name_MAC', 'model_name_MACBOOK',
-        'model_name_NITRO', 'model_name_OMEN', 'model_name_OPTIPLEX',
-        'model_name_PAVILION', 'model_name_PRECISION', 'model_name_PREDATOR',
-        'model_name_PROBOOK', 'model_name_ROG', 'model_name_SPECTRE',
-        'model_name_SPIN', 'model_name_STEALTH', 'model_name_STRIX',
-        'model_name_SURFACE', 'model_name_SWIFT', 'model_name_SWORD',
-        'model_name_THINKBOOK', 'model_name_THINKPAD', 'model_name_TRANSFORMER',
-        'model_name_TRAVELMATE', 'model_name_TUF', 'model_name_VECTOR',
-        'model_name_VICTUS', 'model_name_VIVOBOOK', 'model_name_VOSTRO',
-        'model_name_XPS', 'model_name_YOGA', 'model_name_ZBOOK',
-        'model_name_ZENBOOK'
-    ]
-    # Ensure all columns are present
-    input_data = [data.get(col, 0) for col in columns]
-    input_array = np.array([input_data])
-    prediction = model_laptops.predict(input_array)
+    print("Received JSON:", data)
+    input_dict = {col: data.get(col, 0) for col in columns}
+    X_new = pd.DataFrame([input_dict], columns=columns)
+
+    # Predict
+    prediction = model_laptops.predict(X_new)
     inverse_log_prediction = np.exp(prediction[0])
+
     return jsonify({'prediction': float(inverse_log_prediction)})
 
 
