@@ -7,6 +7,7 @@ app = Flask(__name__)
 CORS(app)
 import pickle
 import pandas as pd
+import os
 
 
 # Load model and columns
@@ -236,5 +237,7 @@ def predict_food():
 def home():
     return 'Laptop Price Prediction API is running.'
 
-if __name__ == '__main__':
-    app.run(debug=True)
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=False)
